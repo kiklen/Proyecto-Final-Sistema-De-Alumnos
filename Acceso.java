@@ -41,36 +41,51 @@ public class Acceso extends JFrame{
             
     public Acceso(){
         super ("Sistema de control de Alumnos");
+        
+        //Se aplica el tema Nimbus 
         try{
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         }catch(Exception e){
         e.printStackTrace();
-    }
+        }
+        
+        //Código HTML para darle formato a las letras de los textos
         estilo1= "<html><font size = '9' face = 'Harlow Solid Italic'; color = '#C5D300'>";
         estilo2= "<html><font size = '5' face = 'Algerian'; color = '#D8E9D6'>";
         estilo3= "<html><font size = '4' face = 'Lucida Calligraphy'; color = 'Yellow'>";
         
+        //se inicializa el panel principal que conriene los componentes del acceso
         panel = new JPanel();
         panel.setLayout(null);
         
+        //Se establece la imagen de fondo
         imagen= new ImageIcon(getClass().getResource("fondo.jpg"));
         fondo = new JLabel(imagen);
         fondo.setBounds(0, 0, 350, 350);
+        
+        //Se inicializa y prepara la siguiente ventana
         horario= new CrearHorario();
+        
+        //Se inicializa el boton para acceder al sistema mediante la validacion
+        //de un numero de control
         acceder= new JButton("Acceder");
         acceder.setBounds(130, 200, 80, 30);
         
+        //Se crea el evento escucha del boton que abrirá la nueva ventana en caso
+        //de encontrar el numero de control en la BD
         acceder.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
                 if(e.getSource()==acceder){
                 if (consultarAlumno()){
-                    bienvenida.setText(estilo1+"Bienvenido "+alumnos.get(indice).getNombre());
+                    bienvenida.setText(estilo1+"Bienvenido "
+                            +alumnos.get(indice).getNombre());
                     bienvenida.setVisible(true);
                     fra = new frame(numControl.getText());
                     fra.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     fra.setVisible(true);
-                    JOptionPane.showMessageDialog(null, "Selecciona tus Materias");
+                    JOptionPane.showMessageDialog(null,"Selecciona tus Materias"
+                            + alumnos.get(indice).getNombre());
                     setVisible(false);
                 }else{
                     bienvenida.setText(estilo3+"No se encontro tu numero de control");
@@ -82,21 +97,28 @@ public class Acceso extends JFrame{
             }
         });
         
+        //Se inicializa la lista de alumnos para la verificacion del numero capturado
         manager = new DBManager();
         alumnos = manager.llenarAlumnos();
         
+        //Aquí es donde se ingresa el número de control
         numControl= new JTextField();
         numControl.setBounds(50,110,250,35);
         
+        //Esta etiqueta da la bienvenida si el alumno fue encontrado o 
+        //manda un mensaje de no aprobación en caso contrario
         nombre=new JLabel(estilo2+"Bienvenido al sistema de control de Alumnos");
         nombre.setBounds(50,10,300,50);
         
-        bienvenida= new JLabel("no funciona");
+        //Inicialmente esta etiqueta no es visible
+        bienvenida = new JLabel();
         bienvenida.setVisible(false);
+        
         
         instruccion = new JLabel(estilo3+"Ingrese el numero de control");
         instruccion.setBounds(50, 80, 300, 30);
         
+        //Se agragan los componentes al panel
          panel.add(nombre);
          panel.add(instruccion);
          panel.add(numControl);
@@ -104,12 +126,12 @@ public class Acceso extends JFrame{
          panel.add(bienvenida);
          panel.add(fondo);
          
-        
+        //Se agrega el panel a la ventana
          add(panel);
     }
     
+    //Método para hacer la validación del ingreso al sistema
     public boolean consultarAlumno(){
-        
         String s = "";
         boolean b=false;
         for (int i = 0; i < alumnos.size(); i++) {
@@ -126,7 +148,6 @@ public class Acceso extends JFrame{
     
     public static void main(String[] args) {
         Acceso acceso = new Acceso();
-        
         acceso.setSize(350,300 );
         acceso.setVisible(true);
         acceso.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

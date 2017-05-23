@@ -11,6 +11,10 @@ package sistemadealumnos;
  * Martes- Jueves 12:15 - 13:55 Ene-Junio 2017
  */
 
+/**
+ * Clase para hacer la consultas y traer los datos desde la BD
+ */
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,41 +24,50 @@ import java.util.ArrayList;
 
 
 public class DBManager {
-   private static final String URL = "jdbc:mysql://localhost/alumnosl";
-   private static final String USERNAME = "root";
-   private static final String PASSWORD = "root";
+   private static final String URL = "jdbc:mysql://localhost/alumnossl";//Direccion y nombre de la BD
+   private static final String USERNAME = "root";//Nombre de usuario de la BD
+   private static final String PASSWORD = "root";//Contraseña de la conexion de la BD
 
-   private Connection connection; 
-   private PreparedStatement selectAlumno; 
-   private PreparedStatement selectMateria; 
-   private PreparedStatement selectGrupo; 
-   private PreparedStatement selectCarrera;
-   private PreparedStatement datosHorario, materiasPosibles;
-   private static final String dbclassname = "com.mysql.jdbc.Driver";
+   private Connection connection; //Conexión que hace la consultas
+   private PreparedStatement selectAlumno; //Argumento para la consulta de la tabla de alumnos
+   private PreparedStatement selectMateria; //Argumento para la consulta de la tabla de materias
+   private PreparedStatement selectGrupo; // Argumento para la consulta de Grupos
+   private PreparedStatement selectCarrera;//Argumento para la consulta de carreras
+   private PreparedStatement datosHorario, materiasPosibles;//Argumentos para la creacion de la lista de materias posibles de un alumno y la creación de su posible horario
+   private static final String dbclassname = "com.mysql.jdbc.Driver";//Llamada al controlador de la BD
    
    public DBManager(){
+       
+       //Se prepara el controlador para la BD
        try{
            Class.forName(dbclassname);
        }catch(Exception e){}
+       
+       //Se inicializa la conexión y se preparan los argumentos de consultas básicas
        try{
        connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
        
        selectAlumno = connection.prepareStatement("select * from alumno");
        selectMateria= connection.prepareStatement("select * from materias");
-       selectGrupo= connection.prepareStatement(  "select * from grupo");
+       selectGrupo  = connection.prepareStatement("select * from grupo");
        selectCarrera= connection.prepareStatement("select * from carrera");
        
        }catch(Exception e){}
    }
    
+   //Consulta que devuelve los datos necesarios para una de las materias del horario
    public Horario crearHorario(Materia m){
        Horario h= null;
        ResultSet tabla= null;
        try{
+           //Se hace la preparación del argumento de consulta
            datosHorario= connection.prepareStatement("select * from materias "
                    + "join grupo where materias.claveMateria = '" + m.getClaveMateria()+"'"+
                    "and grupo.claveMateria = '"+ m.getClaveMateria()+"'");
+           //Se hace la consulta
            tabla = datosHorario.executeQuery();
+           
+           //Se llenan los campos del Horario mediante su constructor
            while(tabla.next()){
                h= new Horario(tabla.getInt("claveGrupo"),tabla.getString("claveMateria"),
                tabla.getString("nombre"),tabla.getString("Hlunes"),tabla.getString("Hmartes"),
@@ -63,6 +76,8 @@ public class DBManager {
                tabla.getString("aula"));
            }
        }catch(Exception e){}
+       
+       //Se cierra la consulta
        finally{
            try{
            tabla.close();
@@ -73,8 +88,10 @@ public class DBManager {
        return h;
    }
    
+   //Método para la creacion de la lista de materias posibles de un alumno de acuerdo a su semestre
    public ArrayList<Materia> materiasPosibles(Alumno a){
        ArrayList <Materia> materia= new ArrayList();
+   
        ResultSet tabla= null;
        try{
            materiasPosibles= connection.prepareStatement("select * from materias "
@@ -98,6 +115,7 @@ public class DBManager {
        return materia;
    }
    
+   //Kétodo para obtener la lista de alumnos disponibles
    public ArrayList<Alumno> llenarAlumnos(){
        ArrayList <Alumno> alumnos = new ArrayList();
        ResultSet tabla = null;
@@ -121,6 +139,7 @@ public class DBManager {
        return alumnos;
    }
    
+   //Método que llena la lista total de materias
    public ArrayList<Materia> llenarMaterias(){
        ArrayList <Materia> materias = new ArrayList();
        ResultSet tabla = null;
